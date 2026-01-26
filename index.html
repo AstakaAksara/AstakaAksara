@@ -143,9 +143,12 @@
         );
 
         filtered.forEach(item => {
+            // Cek jika jawi ada nilai atau tidak
+            const jawiDisplay = item.jawi ? `<div class="jawi">${item.jawi}</div>` : '';
+
             resultsDiv.innerHTML += `
                 <div class="entry">
-                    <div class="jawi">${item.jawi}</div>
+                    ${jawiDisplay}
                     <div class="word">${item.word}</div>
                     <div class="meaning">${item.meaning}</div>
                 </div>
@@ -156,4 +159,5 @@
 
 </body>
 </html>
+
 
