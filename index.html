@@ -35,6 +35,7 @@
             margin: 0; 
             color: var(--primary);
             letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .search-box {
@@ -61,7 +62,6 @@
             border-radius: 15px; 
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             animation: fadeIn 0.4s ease;
-            overflow: hidden;
         }
 
         @keyframes fadeIn {
@@ -81,7 +81,7 @@
             font-weight: bold; 
             font-size: 1.8rem; 
             color: var(--primary);
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .meaning { 
@@ -106,7 +106,7 @@
 <div class="container">
     <header>
         <h1>AstakaAksara</h1>
-        <p>Gerbang Khazanah Bahasa Klasik & Istana</p>
+        <p>Gerbang Khazanah Bahasa Klasik</p>
     </header>
 
     <input type="text" id="searchInput" class="search-box" placeholder="Cari kosa kata atau makna..." onkeyup="searchDict()">
@@ -137,7 +137,6 @@
 
         if (input.length < 1) return;
 
-        // Carian hanya pada perkataan dan makna
         const filtered = dictionaryData.filter(item => 
             item.word.toLowerCase().includes(input) || 
             item.meaning.toLowerCase().includes(input)
