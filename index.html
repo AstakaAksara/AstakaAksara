@@ -62,6 +62,7 @@
             border-radius: 15px; 
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             animation: fadeIn 0.4s ease;
+            overflow: hidden;
         }
 
         @keyframes fadeIn {
@@ -119,7 +120,7 @@
 <script>
     let dictionaryData = [];
 
-    // Mengambil data dari AstakaAksara.json
+    // Ambil data dari AstakaAksara.json
     fetch('AstakaAksara.json')
         .then(response => {
             if (!response.ok) throw new Error("Gagal memuatkan fail JSON");
@@ -133,27 +134,3 @@
     function searchDict() {
         const input = document.getElementById('searchInput').value.toLowerCase();
         const resultsDiv = document.getElementById('results');
-        resultsDiv.innerHTML = '';
-
-        if (input.length < 1) return;
-
-        const filtered = dictionaryData.filter(item => 
-            item.word.toLowerCase().includes(input) || 
-            item.meaning.toLowerCase().includes(input)
-        );
-
-        filtered.forEach(item => {
-            resultsDiv.innerHTML += `
-                <div class="entry">
-                    <div class="jawi">${item.jawi}</div>
-                    <div class="word">${item.word}</div>
-                    <div class="meaning">${item.meaning}</div>
-                </div>
-            `;
-        });
-    }
-</script>
-
-</body>
-</html>
-
