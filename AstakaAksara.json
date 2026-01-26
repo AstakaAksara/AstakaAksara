@@ -2,25 +2,21 @@
   {
     "word": "Alkisah",
     "jawi": "القصه",
-    "pos": "p.u",
-    "category": "Klasik",
-    "meaning": "Maka ceritanya; bermula (digunakan untuk memulakan cerita).",
-    "example": "Alkisah, maka tersebutlah perkataan seorang raja."
+    "meaning": "kata yg digunakan ketika memulakan sesuatu cerita atau riwayat dan bermakna, kisahnya, ceritanya; kisah",
   },
   {
-    "word": "Gering",
-    "jawi": "ݢريڠ",
-    "pos": "adj",
-    "category": "Istana",
-    "meaning": "Sakit (digunakan khusus untuk raja atau kerabat).",
-    "example": "Setelah tiga hari baginda gering, maka mangkatlah baginda."
+    "word": "Adiratna",
+    "jawi": "اديرتنا",
+    "meaning": "sl permata yg mulia (ki bagi perem­puan yg cantik).",
   },
   {
-    "word": "Syahdan",
-    "jawi": "شه دان",
-    "pos": "p.u",
-    "category": "Klasik",
-    "meaning": "Seterusnya, lalu, kemudian daripada itu.",
-    "example": "Syahdan maka baginda pun menceritakan hal itu kepada menteri."
+    "word": "Abiad",
+    "meaning": "putih",
   }
+  {
+    "word": "Adiratna",
+    "jawi": "اديرتنا",
+    "meaning": "sl permata yg mulia (ki bagi perem­puan yg cantik).",
+  },
 ]
+
