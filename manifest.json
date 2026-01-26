@@ -1,0 +1,15 @@
+{
+  "name": "AstakaAksara: Kamus Klasik",
+  "short_name": "AstakaAksara",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#fdfaf5",
+  "theme_color": "#4e342e",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
