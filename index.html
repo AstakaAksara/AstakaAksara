@@ -106,8 +106,8 @@
 
 <div class="container">
     <header>
-        <h1>Astaka Aksara</h1>
-        <p>Gerbang Khazanah Bahasa Klasik</p>
+        <h1>AstakaAksara</h1>
+        <p>Gerbang Khazanah Bahasa Klasik & Istana</p>
     </header>
 
     <input type="text" id="searchInput" class="search-box" placeholder="Cari kosa kata atau makna..." onkeyup="searchDict()">
@@ -134,3 +134,31 @@
     function searchDict() {
         const input = document.getElementById('searchInput').value.toLowerCase();
         const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '';
+
+        if (input.length < 1) return;
+
+        const filtered = dictionaryData.filter(item => 
+            item.word.toLowerCase().includes(input) || 
+            item.meaning.toLowerCase().includes(input)
+        );
+
+        filtered.forEach(item => {
+            // Logik untuk semak jika Jawi ada atau null
+            const jawiHTML = (item.jawi && item.jawi !== null) 
+                ? `<div class="jawi">${item.jawi}</div>` 
+                : '';
+
+            resultsDiv.innerHTML += `
+                <div class="entry">
+                    ${jawiHTML}
+                    <div class="word">${item.word}</div>
+                    <div class="meaning">${item.meaning}</div>
+                </div>
+            `;
+        });
+    }
+</script>
+
+</body>
+</html>
