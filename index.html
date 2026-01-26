@@ -62,7 +62,6 @@
             border-radius: 15px; 
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             animation: fadeIn 0.4s ease;
-            overflow: hidden;
         }
 
         @keyframes fadeIn {
@@ -82,7 +81,7 @@
             font-weight: bold; 
             font-size: 1.8rem; 
             color: var(--primary);
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .meaning { 
@@ -138,22 +137,15 @@
 
         if (input.length < 1) return;
 
-        // Carian hanya pada perkataan dan makna
         const filtered = dictionaryData.filter(item => 
             item.word.toLowerCase().includes(input) || 
             item.meaning.toLowerCase().includes(input)
         );
 
         filtered.forEach(item => {
-            // --- LOGIK BARU DI SINI ---
-            // Jika 'jawi' ada isi, paparkan div jawi. Jika null/kosong, simpan string kosong ''.
-            const jawiDisplay = (item.jawi && item.jawi !== null) 
-                ? `<div class="jawi">${item.jawi}</div>` 
-                : ''; 
-
             resultsDiv.innerHTML += `
                 <div class="entry">
-                    ${jawiDisplay}
+                    <div class="jawi">${item.jawi}</div>
                     <div class="word">${item.word}</div>
                     <div class="meaning">${item.meaning}</div>
                 </div>
