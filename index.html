@@ -13,8 +13,17 @@
             --card: #ffffff;
         }
         
+        /* Accessible hidden (screen-reader only) */
+        .sr-only {
+            position: absolute !important;
+            height: 1px; width: 1px;
+            overflow: hidden;
+            clip: rect(1px, 1px, 1px, 1px);
+            white-space: nowrap;
+        }
+
         body { 
-            font-family: 'Segoe UI', serif; 
+            font-family: 'Segoe UI', system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; 
             background: var(--bg); 
             margin: 0; 
             padding: 20px; 
@@ -55,6 +64,8 @@
             box-shadow: 0 0 15px rgba(184, 134, 11, 0.15); 
         }
 
+        /* results list */
+        #results { list-style: none; padding: 0; margin: 0; }
         .entry {
             background: var(--card); 
             padding: 25px; 
@@ -62,6 +73,8 @@
             border-radius: 15px; 
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             animation: fadeIn 0.4s ease;
+            display: block;
+            overflow: auto;
         }
 
         @keyframes fadeIn {
@@ -75,6 +88,7 @@
             color: var(--primary); 
             float: right; 
             direction: rtl;
+            margin-left: 12px;
         }
 
         .word { 
@@ -93,6 +107,12 @@
             clear: both;
         }
 
+        .no-results {
+            text-align: center;
+            padding: 30px 15px;
+            color: #666;
+        }
+
         .footer-note {
             text-align: center;
             margin-top: 50px;
@@ -109,55 +129,133 @@
         <p>Gerbang Khazanah Bahasa Klasik</p>
     </header>
 
-    <input type="text" id="searchInput" class="search-box" placeholder="Cari kosa kata atau makna..." onkeyup="searchDict()">
+    <label for="searchInput" class="sr-only">Cari kosa kata atau makna</label>
+    <input type="text" id="searchInput" class="search-box" placeholder="Cari kosa kata atau makna...">
 
-    <div id="results"></div>
+    <main>
+        <!-- results updated dynamically; screen readers will be notified via aria-live -->
+        <ul id="results" role="list" aria-live="polite" aria-busy="false"></ul>
+    </main>
 
     <div class="footer-note">© 2026 AstakaAksara Digital</div>
 </div>
 
 <script>
     let dictionaryData = [];
+    const resultsEl = document.getElementById('results');
+    const inputEl = document.getElementById('searchInput');
+    let debounceTimer = null;
 
-    // Mengambil data dari AstakaAksara.json
+    // Load JSON data (must be served over HTTP(S); fetch won't work via file:// in many browsers)
     fetch('AstakaAksara.json')
         .then(response => {
-            if (!response.ok) throw new Error("Gagal memuatkan fail JSON");
+            if (!response.ok) throw new Error("Gagal memuatkan fail JSON: " + response.statusText);
             return response.json();
         })
         .then(data => {
+            if (!Array.isArray(data)) {
+                console.error("Ralat: format JSON tidak seperti yang dijangka (bukan array).");
+                return;
+            }
             dictionaryData = data;
         })
         .catch(err => console.error("Ralat:", err));
 
-    function searchDict() {
-        const input = document.getElementById('searchInput').value.toLowerCase();
-        const resultsDiv = document.getElementById('results');
-        resultsDiv.innerHTML = '';
-
-        if (input.length < 1) return;
-
-        const filtered = dictionaryData.filter(item => 
-            item.word.toLowerCase().includes(input) || 
-            item.meaning.toLowerCase().includes(input)
-        );
-
-        filtered.forEach(item => {
-            // Cek jika jawi ada nilai atau tidak
-            const jawiDisplay = item.jawi ? `<div class="jawi">${item.jawi}</div>` : '';
-
-            resultsDiv.innerHTML += `
-                <div class="entry">
-                    ${jawiDisplay}
-                    <div class="word">${item.word}</div>
-                    <div class="meaning">${item.meaning}</div>
-                </div>
-            `;
-        });
+    // Utility: normalize text for case-insensitive comparisons
+    function normalizeText(s) {
+        try {
+            return String(s).toLowerCase();
+        } catch (e) {
+            return '';
+        }
     }
+
+    // Clear results helper
+    function clearResults() {
+        resultsEl.innerHTML = '';
+    }
+
+    // Render list of matching items safely (using textContent)
+    function renderResults(items, query) {
+        clearResults();
+
+        if (!items.length) {
+            const li = document.createElement('li');
+            li.className = 'no-results';
+            li.textContent = 'Tiada padanan';
+            resultsEl.appendChild(li);
+            return;
+        }
+
+        // Build fragment then append once
+        const frag = document.createDocumentFragment();
+
+        items.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'entry';
+
+            // Jawi (if available)
+            if (item.jawi) {
+                const jawiDiv = document.createElement('div');
+                jawiDiv.className = 'jawi';
+                jawiDiv.textContent = item.jawi;
+                li.appendChild(jawiDiv);
+            }
+
+            const wordDiv = document.createElement('div');
+            wordDiv.className = 'word';
+            wordDiv.textContent = item.word || '';
+            li.appendChild(wordDiv);
+
+            const meaningDiv = document.createElement('div');
+            meaningDiv.className = 'meaning';
+            meaningDiv.textContent = item.meaning || '';
+            li.appendChild(meaningDiv);
+
+            frag.appendChild(li);
+        });
+
+        resultsEl.appendChild(frag);
+    }
+
+    function doSearch() {
+        const raw = inputEl.value.trim();
+        const input = normalizeText(raw);
+
+        // If input empty, clear results (you can also show recent items)
+        if (input.length < 1) {
+            clearResults();
+            return;
+        }
+
+        // Filter safely (guard fields)
+        const filtered = dictionaryData.filter(item => {
+            const word = normalizeText(item && item.word);
+            const meaning = normalizeText(item && item.meaning);
+
+            return word.includes(input) || meaning.includes(input);
+        });
+
+        renderResults(filtered, input);
+    }
+
+    // Debounced input handler; use 'input' to include paste and other input methods
+    inputEl.addEventListener('input', () => {
+        // simple debounce
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            doSearch();
+        }, 180);
+    });
+
+    // Optional: allow Enter to focus first result (simple behaviour)
+    inputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const first = resultsEl.querySelector('.entry');
+            if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
 </script>
 
 </body>
 </html>
-
-
