@@ -35,6 +35,7 @@
             margin: 0; 
             color: var(--primary);
             letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .search-box {
@@ -144,9 +145,15 @@
         );
 
         filtered.forEach(item => {
+            // --- LOGIK BARU DI SINI ---
+            // Jika 'jawi' ada isi, paparkan div jawi. Jika null/kosong, simpan string kosong ''.
+            const jawiDisplay = (item.jawi && item.jawi !== null) 
+                ? `<div class="jawi">${item.jawi}</div>` 
+                : ''; 
+
             resultsDiv.innerHTML += `
                 <div class="entry">
-                    <div class="jawi">${item.jawi}</div>
+                    ${jawiDisplay}
                     <div class="word">${item.word}</div>
                     <div class="meaning">${item.meaning}</div>
                 </div>
