@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AstakaAksara | Kamus Bahasa Klasik</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4e342e">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
     <style>
         :root { 
             --primary: #4e342e; 
@@ -14,7 +19,7 @@
         }
         
         body { 
-            font-family: 'Segoe UI', serif; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             background: var(--bg); 
             margin: 0; 
             padding: 20px; 
@@ -31,10 +36,25 @@
         }
 
         h1 { 
-            font-size: 2.5rem; 
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem; 
             margin: 0; 
             color: var(--primary);
             letter-spacing: 2px;
+        }
+
+        p.tagline {
+            font-style: italic;
+            color: #6d4c41;
+            margin-top: 5px;
+        }
+
+        .search-container {
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+            background: var(--bg);
+            padding: 10px 0;
         }
 
         .search-box {
@@ -47,11 +67,12 @@
             box-sizing: border-box;
             transition: 0.3s;
             background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
         .search-box:focus { 
             border-color: var(--accent); 
-            box-shadow: 0 0 15px rgba(184, 134, 11, 0.15); 
+            box-shadow: 0 0 15px rgba(184, 134, 11, 0.2); 
         }
 
         .entry {
@@ -61,6 +82,7 @@
             border-radius: 15px; 
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             animation: fadeIn 0.4s ease;
+            border-left: 5px solid var(--accent);
         }
 
         @keyframes fadeIn {
@@ -70,13 +92,14 @@
 
         .jawi { 
             font-family: 'Noto Naskh Arabic', serif; 
-            font-size: 2rem; 
+            font-size: 2.2rem; 
             color: var(--primary); 
             float: right; 
             direction: rtl;
+            margin-bottom: 10px;
         }
 
-        .word { font-weight: bold; font-size: 1.6rem; color: var(--primary); }
+        .word { font-weight: bold; font-size: 1.8rem; color: var(--primary); }
 
         .tag { 
             display: inline-block; 
@@ -85,29 +108,54 @@
             border-radius: 20px; 
             font-size: 0.75rem; 
             color: var(--primary); 
-            margin: 8px 0;
+            margin: 10px 0;
             font-weight: bold;
+            text-transform: uppercase;
         }
 
-        .meaning { margin: 15px 0; line-height: 1.7; font-size: 1.05rem; }
+        .meaning { 
+            margin: 15px 0; 
+            line-height: 1.8; 
+            font-size: 1.1rem; 
+            clear: both;
+        }
 
-        .example { 
+        .example-box {
+            background: #fcfbf7;
+            padding: 15px;
+            border-radius: 8px;
+            border-right: 4px solid var(--accent);
+            margin-top: 15px;
+        }
+
+        .example-label {
+            font-size: 0.7rem;
+            color: var(--accent);
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .example-text { 
             font-style: italic; 
             color: #555; 
-            font-size: 0.95rem; 
-            border-right: 4px solid var(--accent); 
-            padding-right: 15px;
+            font-size: 1rem; 
             text-align: right;
-            background: #f9f9f9;
-            padding: 10px;
-            border-radius: 5px;
         }
 
         .footer-note {
             text-align: center;
-            margin-top: 50px;
-            font-size: 0.8rem;
-            color: #999;
+            margin-top: 60px;
+            padding-bottom: 20px;
+            font-size: 0.85rem;
+            color: #8d6e63;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .jawi { font-size: 1.8rem; }
+            .entry { padding: 15px; }
         }
     </style>
 </head>
@@ -116,29 +164,39 @@
 <div class="container">
     <header>
         <h1>AstakaAksara</h1>
-        <p>Gerbang Khazanah Bahasa Klasik & Istana</p>
+        <p class="tagline">Gerbang Khazanah Bahasa Klasik & Istana</p>
     </header>
 
-    <input type="text" id="searchInput" class="search-box" placeholder="Cari kosa kata (Rumi atau makna)..." onkeyup="searchDict()">
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-box" placeholder="Cari kosa kata (Rumi atau makna)..." onkeyup="searchDict()">
+    </div>
 
-    <div id="results"></div>
+    <div id="results">
+        </div>
 
-    <div class="footer-note">© 2026 AstakaAksara Digital</div>
+    <div class="footer-note">
+        <p>Hayati keindahan bahasa ibunda melalui zaman.</p>
+        © 2026 AstakaAksara Digital
+    </div>
 </div>
 
 <script>
     let dictionaryData = [];
 
-    // MENGAMBIL DATA DARI FAIL AstakaAksara.json
+    // Mengambil data dari fail AstakaAksara.json
     fetch('AstakaAksara.json')
         .then(response => {
-            if (!response.ok) throw new Error("Gagal memuatkan fail JSON");
+            if (!response.ok) throw new Error("Fail JSON tidak ditemui.");
             return response.json();
         })
         .then(data => {
             dictionaryData = data;
+            console.log("Data berjaya dimuatkan!");
         })
-        .catch(err => console.error("Ralat:", err));
+        .catch(err => {
+            console.error("Ralat:", err);
+            document.getElementById('results').innerHTML = `<p style="text-align:center; color:red;">Ralat: Gagal memuatkan pangkalan data.</p>`;
+        });
 
     function searchDict() {
         const input = document.getElementById('searchInput').value.toLowerCase();
@@ -152,14 +210,22 @@
             item.meaning.toLowerCase().includes(input)
         );
 
+        if (filtered.length === 0) {
+            resultsDiv.innerHTML = `<p style="text-align:center; margin-top:20px; color:#999;">Tiada padanan ditemui.</p>`;
+            return;
+        }
+
         filtered.forEach(item => {
             resultsDiv.innerHTML += `
                 <div class="entry">
                     <div class="jawi">${item.jawi}</div>
                     <div class="word">${item.word}</div>
-                    <div class="tag">${item.category.toUpperCase()} • ${item.pos}</div>
+                    <div class="tag">${item.category} • ${item.pos}</div>
                     <div class="meaning">${item.meaning}</div>
-                    <div class="example">${item.example}</div>
+                    <div class="example-box">
+                        <span class="example-label">CONTOH PENGGUNAAN:</span>
+                        <div class="example-text">"${item.example}"</div>
+                    </div>
                 </div>
             `;
         });
