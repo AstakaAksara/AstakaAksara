@@ -35,7 +35,6 @@
             margin: 0; 
             color: var(--primary);
             letter-spacing: 2px;
-            text-transform: uppercase;
         }
 
         .search-box {
@@ -82,7 +81,7 @@
             font-weight: bold; 
             font-size: 1.8rem; 
             color: var(--primary);
-            margin-bottom: 5px;
+            margin-bottom: 10px;
         }
 
         .meaning { 
@@ -106,8 +105,8 @@
 
 <div class="container">
     <header>
-        <h1>Astaka Aksara</h1>
-        <p>Gerbang Khazanah Bahasa Klasik</p>
+        <h1>AstakaAksara</h1>
+        <p>Gerbang Khazanah Bahasa Klasik & Istana</p>
     </header>
 
     <input type="text" id="searchInput" class="search-box" placeholder="Cari kosa kata atau makna..." onkeyup="searchDict()">
@@ -120,7 +119,7 @@
 <script>
     let dictionaryData = [];
 
-    // Ambil data dari AstakaAksara.json
+    // Mengambil data dari AstakaAksara.json
     fetch('AstakaAksara.json')
         .then(response => {
             if (!response.ok) throw new Error("Gagal memuatkan fail JSON");
@@ -138,20 +137,16 @@
 
         if (input.length < 1) return;
 
+        // Carian hanya pada perkataan dan makna
         const filtered = dictionaryData.filter(item => 
             item.word.toLowerCase().includes(input) || 
             item.meaning.toLowerCase().includes(input)
         );
 
         filtered.forEach(item => {
-            // Logik untuk semak jika Jawi ada atau null
-            const jawiHTML = (item.jawi && item.jawi !== null) 
-                ? `<div class="jawi">${item.jawi}</div>` 
-                : '';
-
             resultsDiv.innerHTML += `
                 <div class="entry">
-                    ${jawiHTML}
+                    <div class="jawi">${item.jawi}</div>
                     <div class="word">${item.word}</div>
                     <div class="meaning">${item.meaning}</div>
                 </div>
@@ -162,4 +157,3 @@
 
 </body>
 </html>
-
