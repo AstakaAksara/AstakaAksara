@@ -61,6 +61,7 @@
             border-radius: 15px; 
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             animation: fadeIn 0.4s ease;
+            overflow: hidden;
         }
 
         @keyframes fadeIn {
@@ -70,37 +71,26 @@
 
         .jawi { 
             font-family: 'Noto Naskh Arabic', serif; 
-            font-size: 2rem; 
+            font-size: 2.2rem; 
             color: var(--primary); 
             float: right; 
             direction: rtl;
         }
 
-        .word { font-weight: bold; font-size: 1.6rem; color: var(--primary); }
-
-        .tag { 
-            display: inline-block; 
-            background: #f1ebd9; 
-            padding: 4px 12px;
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            color: var(--primary); 
-            margin: 8px 0;
-            font-weight: bold;
+        .word { 
+            font-weight: bold; 
+            font-size: 1.8rem; 
+            color: var(--primary);
+            margin-bottom: 10px;
         }
 
-        .meaning { margin: 15px 0; line-height: 1.7; font-size: 1.05rem; }
-
-        .example { 
-            font-style: italic; 
-            color: #555; 
-            font-size: 0.95rem; 
-            border-right: 4px solid var(--accent); 
-            padding-right: 15px;
-            text-align: right;
-            background: #f9f9f9;
-            padding: 10px;
-            border-radius: 5px;
+        .meaning { 
+            margin-top: 15px; 
+            line-height: 1.7; 
+            font-size: 1.1rem; 
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            clear: both;
         }
 
         .footer-note {
@@ -116,10 +106,10 @@
 <div class="container">
     <header>
         <h1>AstakaAksara</h1>
-        <p>Gerbang Khazanah Bahasa Klasik</p>
+        <p>Gerbang Khazanah Bahasa Klasik & Istana</p>
     </header>
 
-    <input type="text" id="searchInput" class="search-box" placeholder="Cari kosa kata (Rumi atau makna)..." onkeyup="searchDict()">
+    <input type="text" id="searchInput" class="search-box" placeholder="Cari kosa kata atau makna..." onkeyup="searchDict()">
 
     <div id="results"></div>
 
@@ -129,7 +119,7 @@
 <script>
     let dictionaryData = [];
 
-    // MENGAMBIL DATA DARI FAIL AstakaAksara.json
+    // Mengambil data dari AstakaAksara.json
     fetch('AstakaAksara.json')
         .then(response => {
             if (!response.ok) throw new Error("Gagal memuatkan fail JSON");
@@ -147,6 +137,7 @@
 
         if (input.length < 1) return;
 
+        // Carian hanya pada perkataan dan makna
         const filtered = dictionaryData.filter(item => 
             item.word.toLowerCase().includes(input) || 
             item.meaning.toLowerCase().includes(input)
@@ -157,9 +148,7 @@
                 <div class="entry">
                     <div class="jawi">${item.jawi}</div>
                     <div class="word">${item.word}</div>
-                    <div class="tag">${item.category.toUpperCase()} • ${item.pos}</div>
                     <div class="meaning">${item.meaning}</div>
-                    <div class="example">${item.example}</div>
                 </div>
             `;
         });
@@ -168,4 +157,3 @@
 
 </body>
 </html>
-
