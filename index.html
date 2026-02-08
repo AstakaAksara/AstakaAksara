@@ -13,7 +13,6 @@
             --card: #ffffff;
         }
         
-        /* Accessible hidden (screen-reader only) */
         .sr-only {
             position: absolute !important;
             height: 1px; width: 1px;
@@ -64,8 +63,8 @@
             box-shadow: 0 0 15px rgba(184, 134, 11, 0.15); 
         }
 
-        /* results list */
         #results { list-style: none; padding: 0; margin: 0; }
+        
         .entry {
             background: var(--card); 
             padding: 25px; 
@@ -113,6 +112,13 @@
             color: #666;
         }
 
+        .loading-text {
+            text-align: center;
+            color: var(--accent);
+            font-style: italic;
+            margin-top: 20px;
+        }
+
         .footer-note {
             text-align: center;
             margin-top: 50px;
@@ -130,11 +136,11 @@
     </header>
 
     <label for="searchInput" class="sr-only">Cari kosa kata atau makna</label>
-    <input type="text" id="searchInput" class="search-box" placeholder="Cari kosa kata atau makna...">
+    <input type="text" id="searchInput" class="search-box" placeholder="Cari kosa kata atau makna..." disabled>
+    <div id="loadingIndicator" class="loading-text">Sedang memuatkan pangkalan data...</div>
 
     <main>
-        <!-- results updated dynamically; screen readers will be notified via aria-live -->
-        <ul id="results" role="list" aria-live="polite" aria-busy="false"></ul>
+        <ul id="results" role="list" aria-live="polite"></ul>
     </main>
 
     <div class="footer-note">© 2026 AstakaAksara Digital</div>
@@ -144,41 +150,83 @@
     let dictionaryData = [];
     const resultsEl = document.getElementById('results');
     const inputEl = document.getElementById('searchInput');
+    const loadingEl = document.getElementById('loadingIndicator');
     let debounceTimer = null;
 
-    // Load JSON data (must be served over HTTP(S); fetch won't work via file:// in many browsers)
-    fetch('AstakaAksara.json')
-        .then(response => {
-            if (!response.ok) throw new Error("Gagal memuatkan fail JSON: " + response.statusText);
-            return response.json();
-        })
-        .then(data => {
-            if (!Array.isArray(data)) {
-                console.error("Ralat: format JSON tidak seperti yang dijangka (bukan array).");
-                return;
-            }
-            dictionaryData = data;
-        })
-        .catch(err => console.error("Ralat:", err));
+    // --- CSV PARSER (The Magic Part) ---
+    // This function turns CSV text into a usable Array of Objects
+    function parseCSV(str) {
+        const arr = [];
+        let quote = false;  // 'true' means we're inside a quoted field
+        let col = 0, c = 0;
+        
+        // Normalize line breaks
+        str = str.replace(/\r\n/g, '\n');
+        
+        for (; c < str.length; c++) {
+            let cc = str[c], nc = str[c+1];        // Current char, Next char
+            arr[col] = arr[col] || [];             // Create row if not exists
+            arr[col][0] = arr[col][0] || "";       // Create column if not exists
 
-    // Utility: normalize text for case-insensitive comparisons
-    function normalizeText(s) {
-        try {
-            return String(s).toLowerCase();
-        } catch (e) {
-            return '';
+            // If it's a quote, toggle the quote state
+            if (cc == '"' && quote && nc == '"') { arr[col][arr[col].length-1] += cc; ++c; }
+            else if (cc == '"') { quote = !quote; }
+            // If comma and NOT in quotes, move to next column
+            else if (cc == ',' && !quote) { arr[col].push(""); }
+            // If newline and NOT in quotes, move to next row
+            else if (cc == '\n' && !quote) { ++col; }
+            // Otherwise, add character to current cell
+            else { arr[col][arr[col].length-1] += cc; }
         }
+        return arr;
     }
 
-    // Clear results helper
+    // --- LOAD DATA ---
+    // Changed from .json to .csv
+    fetch('AstakaAksara.csv')
+        .then(response => {
+            if (!response.ok) throw new Error("Gagal memuatkan fail CSV");
+            return response.text();
+        })
+        .then(text => {
+            const rawData = parseCSV(text);
+            
+            // Convert array of arrays (CSV) to array of objects
+            // Skipping index 0 because it contains headers (word, jawi, meaning)
+            for(let i = 1; i < rawData.length; i++) {
+                const row = rawData[i];
+                if(row.length >= 2 && row[0]) { // Ensure row has content
+                    dictionaryData.push({
+                        word: row[0],
+                        jawi: row[1],
+                        meaning: row[2]
+                    });
+                }
+            }
+
+            // Enable input
+            loadingEl.style.display = 'none';
+            inputEl.disabled = false;
+            inputEl.placeholder = "Cari kosa kata atau makna...";
+            inputEl.focus();
+        })
+        .catch(err => {
+            console.error("Ralat:", err);
+            loadingEl.textContent = "Ralat: Pangkalan data tidak dijumpai. Pastikan fail AstakaAksara.csv wujud.";
+            loadingEl.style.color = "red";
+        });
+
+    // --- SEARCH LOGIC (Unchanged) ---
+    function normalizeText(s) {
+        try { return String(s).toLowerCase(); } catch (e) { return ''; }
+    }
+
     function clearResults() {
         resultsEl.innerHTML = '';
     }
 
-    // Render list of matching items safely (using textContent)
-    function renderResults(items, query) {
+    function renderResults(items) {
         clearResults();
-
         if (!items.length) {
             const li = document.createElement('li');
             li.className = 'no-results';
@@ -187,14 +235,11 @@
             return;
         }
 
-        // Build fragment then append once
         const frag = document.createDocumentFragment();
-
         items.forEach(item => {
             const li = document.createElement('li');
             li.className = 'entry';
 
-            // Jawi (if available)
             if (item.jawi) {
                 const jawiDiv = document.createElement('div');
                 jawiDiv.className = 'jawi';
@@ -214,7 +259,6 @@
 
             frag.appendChild(li);
         });
-
         resultsEl.appendChild(frag);
     }
 
@@ -222,33 +266,27 @@
         const raw = inputEl.value.trim();
         const input = normalizeText(raw);
 
-        // If input empty, clear results (you can also show recent items)
         if (input.length < 1) {
             clearResults();
             return;
         }
 
-        // Filter safely (guard fields)
         const filtered = dictionaryData.filter(item => {
-            const word = normalizeText(item && item.word);
-            const meaning = normalizeText(item && item.meaning);
-
+            const word = normalizeText(item.word);
+            const meaning = normalizeText(item.meaning);
             return word.includes(input) || meaning.includes(input);
         });
 
-        renderResults(filtered, input);
+        renderResults(filtered);
     }
 
-    // Debounced input handler; use 'input' to include paste and other input methods
     inputEl.addEventListener('input', () => {
-        // simple debounce
         if (debounceTimer) clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
             doSearch();
         }, 180);
     });
 
-    // Optional: allow Enter to focus first result (simple behaviour)
     inputEl.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             const first = resultsEl.querySelector('.entry');
