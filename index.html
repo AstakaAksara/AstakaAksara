@@ -46,6 +46,12 @@
             text-transform: uppercase;
         }
 
+        .subtitle {
+            font-style: italic;
+            color: #666;
+            margin-top: 5px;
+        }
+
         .search-box {
             width: 100%; 
             padding: 15px 25px; 
@@ -74,6 +80,7 @@
             animation: fadeIn 0.4s ease;
             display: block;
             overflow: auto;
+            border-left: 5px solid var(--accent);
         }
 
         @keyframes fadeIn {
@@ -83,33 +90,35 @@
 
         .jawi { 
             font-family: 'Noto Naskh Arabic', serif; 
-            font-size: 2.2rem; 
+            font-size: 2.4rem; 
             color: var(--primary); 
             float: right; 
             direction: rtl;
-            margin-left: 12px;
+            margin-left: 15px;
+            line-height: 1;
         }
 
         .word { 
-            font-weight: bold; 
-            font-size: 1.8rem; 
+            font-weight: 700; 
+            font-size: 1.6rem; 
             color: var(--primary);
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            text-transform: capitalize;
         }
 
         .meaning { 
-            margin-top: 15px; 
-            line-height: 1.7; 
-            font-size: 1.1rem; 
-            border-top: 1px solid #eee;
-            padding-top: 15px;
+            margin-top: 10px; 
+            line-height: 1.6; 
+            font-size: 1.05rem; 
+            color: #444;
             clear: both;
         }
 
         .no-results {
             text-align: center;
-            padding: 30px 15px;
-            color: #666;
+            padding: 40px;
+            color: #888;
+            font-style: italic;
         }
 
         .loading-text {
@@ -124,6 +133,8 @@
             margin-top: 50px;
             font-size: 0.8rem;
             color: #999;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
         }
     </style>
 </head>
@@ -132,18 +143,21 @@
 <div class="container">
     <header>
         <h1>Astaka Aksara</h1>
-        <p>Gerbang Khazanah Bahasa Klasik</p>
+        <p class="subtitle">Khazanah Bahasa & Tulisan Jawi</p>
     </header>
 
     <label for="searchInput" class="sr-only">Cari kosa kata atau makna</label>
-    <input type="text" id="searchInput" class="search-box" placeholder="Cari kosa kata atau makna..." disabled>
+    <input type="text" id="searchInput" class="search-box" placeholder="Mencari..." disabled>
     <div id="loadingIndicator" class="loading-text">Sedang memuatkan pangkalan data...</div>
 
     <main>
         <ul id="results" role="list" aria-live="polite"></ul>
     </main>
 
-    <div class="footer-note">© 2026 AstakaAksara Digital</div>
+    <div class="footer-note">
+        &copy; 2026 AstakaAksara Digital<br>
+        <i>Dipelihara di GitHub</i>
+    </div>
 </div>
 
 <script>
@@ -153,36 +167,29 @@
     const loadingEl = document.getElementById('loadingIndicator');
     let debounceTimer = null;
 
-    // --- CSV PARSER (The Magic Part) ---
-    // This function turns CSV text into a usable Array of Objects
+    // --- CSV PARSER ---
     function parseCSV(str) {
         const arr = [];
-        let quote = false;  // 'true' means we're inside a quoted field
+        let quote = false;
         let col = 0, c = 0;
         
-        // Normalize line breaks
-        str = str.replace(/\r\n/g, '\n');
+        str = str.replace(/\r\n/g, '\n'); // Normalize newlines
         
         for (; c < str.length; c++) {
-            let cc = str[c], nc = str[c+1];        // Current char, Next char
-            arr[col] = arr[col] || [];             // Create row if not exists
-            arr[col][0] = arr[col][0] || "";       // Create column if not exists
+            let cc = str[c], nc = str[c+1];
+            arr[col] = arr[col] || [];
+            arr[col][0] = arr[col][0] || "";
 
-            // If it's a quote, toggle the quote state
             if (cc == '"' && quote && nc == '"') { arr[col][arr[col].length-1] += cc; ++c; }
             else if (cc == '"') { quote = !quote; }
-            // If comma and NOT in quotes, move to next column
             else if (cc == ',' && !quote) { arr[col].push(""); }
-            // If newline and NOT in quotes, move to next row
             else if (cc == '\n' && !quote) { ++col; }
-            // Otherwise, add character to current cell
             else { arr[col][arr[col].length-1] += cc; }
         }
         return arr;
     }
 
     // --- LOAD DATA ---
-    // Changed from .json to .csv
     fetch('AstakaAksara.csv')
         .then(response => {
             if (!response.ok) throw new Error("Gagal memuatkan fail CSV");
@@ -191,36 +198,33 @@
         .then(text => {
             const rawData = parseCSV(text);
             
-            // Convert array of arrays (CSV) to array of objects
-            // Skipping index 0 because it contains headers (word, jawi, meaning)
+            // Skip header (index 0) and process rows
             for(let i = 1; i < rawData.length; i++) {
                 const row = rawData[i];
-                if(row.length >= 2 && row[0]) { // Ensure row has content
+                if(row.length >= 1 && row[0]) { 
                     dictionaryData.push({
-                        word: row[0],
-                        jawi: row[1],
-                        meaning: row[2]
+                        word: row[0].trim(),
+                        jawi: row[1] ? row[1].trim() : "",
+                        meaning: row[2] ? row[2].trim() : "Tiada definisi."
                     });
                 }
             }
 
-            // Enable input
+            // Sort Alphabetically
+            dictionaryData.sort((a, b) => a.word.localeCompare(b.word));
+
             loadingEl.style.display = 'none';
             inputEl.disabled = false;
-            inputEl.placeholder = "Cari kosa kata atau makna...";
+            inputEl.placeholder = "Cari perkataan (contoh: Adiwarna)";
             inputEl.focus();
         })
         .catch(err => {
-            console.error("Ralat:", err);
-            loadingEl.textContent = "Ralat: Pangkalan data tidak dijumpai. Pastikan fail AstakaAksara.csv wujud.";
+            console.error(err);
+            loadingEl.textContent = "Ralat: Fail 'AstakaAksara.csv' tidak dijumpai.";
             loadingEl.style.color = "red";
         });
 
-    // --- SEARCH LOGIC (Unchanged) ---
-    function normalizeText(s) {
-        try { return String(s).toLowerCase(); } catch (e) { return ''; }
-    }
-
+    // --- SEARCH ENGINE ---
     function clearResults() {
         resultsEl.innerHTML = '';
     }
@@ -228,18 +232,20 @@
     function renderResults(items) {
         clearResults();
         if (!items.length) {
-            const li = document.createElement('li');
-            li.className = 'no-results';
-            li.textContent = 'Tiada padanan';
-            resultsEl.appendChild(li);
+            resultsEl.innerHTML = '<li class="no-results">Tiada padanan dijumpai.</li>';
             return;
         }
 
-        const frag = document.createDocumentFragment();
-        items.forEach(item => {
+        // --- LIMIT SET TO 10 HERE ---
+        const limit = 10; 
+        const fragment = document.createDocumentFragment();
+
+        // .slice(0, limit) ensures we only take the first 10 items
+        items.slice(0, limit).forEach(item => {
             const li = document.createElement('li');
             li.className = 'entry';
 
+            // Jawi Element
             if (item.jawi) {
                 const jawiDiv = document.createElement('div');
                 jawiDiv.className = 'jawi';
@@ -247,34 +253,35 @@
                 li.appendChild(jawiDiv);
             }
 
+            // Word Element
             const wordDiv = document.createElement('div');
             wordDiv.className = 'word';
-            wordDiv.textContent = item.word || '';
+            wordDiv.textContent = item.word;
             li.appendChild(wordDiv);
 
+            // Meaning Element
             const meaningDiv = document.createElement('div');
             meaningDiv.className = 'meaning';
-            meaningDiv.textContent = item.meaning || '';
+            meaningDiv.textContent = item.meaning;
             li.appendChild(meaningDiv);
 
-            frag.appendChild(li);
+            fragment.appendChild(li);
         });
-        resultsEl.appendChild(frag);
+        resultsEl.appendChild(fragment);
     }
 
     function doSearch() {
         const raw = inputEl.value.trim();
-        const input = normalizeText(raw);
+        const term = raw.toLowerCase();
 
-        if (input.length < 1) {
+        if (term.length < 1) {
             clearResults();
             return;
         }
 
         const filtered = dictionaryData.filter(item => {
-            const word = normalizeText(item.word);
-            const meaning = normalizeText(item.meaning);
-            return word.includes(input) || meaning.includes(input);
+            return item.word.toLowerCase().includes(term) || 
+                   item.meaning.toLowerCase().includes(term);
         });
 
         renderResults(filtered);
@@ -282,16 +289,7 @@
 
     inputEl.addEventListener('input', () => {
         if (debounceTimer) clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            doSearch();
-        }, 180);
-    });
-
-    inputEl.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            const first = resultsEl.querySelector('.entry');
-            if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+        debounceTimer = setTimeout(doSearch, 150);
     });
 </script>
 
