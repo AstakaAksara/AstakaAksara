@@ -4,13 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <meta name="description" content="Kamus Bahasa Melayu Klasik dan Tulisan Jawi. Cari maksud perkataan sastera lama, hikayat, dan puisi Melayu dengan mudah.">
-    <meta name="keywords" content="kamus klasik, bahasa melayu klasik, tulisan jawi, maksud perkataan, sastera, hikayat, adiwarna, komsas">
+    <title>Astaka Aksara | Kamus Bahasa Melayu Klasik & Jawi</title>
+    <meta name="description" content="Cari maksud perkataan Melayu Klasik, kosa kata sastera lama, dan ejaan Jawi dengan pantas. Rujukan terbaik untuk hikayat dan puisi tradisional.">
+    <meta name="keywords" content="kamus jawi, bahasa melayu klasik, kosa kata klasik, maksud perkataan sastera, kamus komsas, ejaan jawi online, kosa kata hikayat, bahasa istana">
     <meta name="author" content="Astaka Aksara">
+
     <meta property="og:title" content="Astaka Aksara | Kamus Bahasa Klasik">
     <meta property="og:description" content="Temui keindahan bahasa Melayu klasik. Pangkalan data perkataan hikayat dan ejaan Jawi.">
-    <title>Astaka Aksara | Kamus Bahasa Klasik</title>
-    
+    <meta property="og:type" content="website">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Astaka Aksara",
+      "alternateName": "Kamus Bahasa Klasik",
+      "url": "https://astakaaksara.github.io/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://astakaaksara.github.io/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
     <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
@@ -43,270 +60,4 @@
             text-align: center; 
             border-bottom: 2px solid var(--accent); 
             padding-bottom: 20px;
-            margin-bottom: 30px; 
-        }
-
-        h1 { 
-            font-size: 2.5rem; 
-            margin: 0; 
-            color: var(--primary);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .subtitle {
-            font-style: italic;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .search-box {
-            width: 100%; 
-            padding: 15px 25px; 
-            border: 2px solid #dcdcdc; 
-            border-radius: 30px;
-            font-size: 1.1rem; 
-            outline: none; 
-            box-sizing: border-box;
-            transition: 0.3s;
-            background: white;
-        }
-
-        .search-box:focus { 
-            border-color: var(--accent); 
-            box-shadow: 0 0 15px rgba(184, 134, 11, 0.15); 
-        }
-
-        #results { list-style: none; padding: 0; margin: 0; }
-        
-        .entry {
-            background: var(--card); 
-            padding: 25px; 
-            margin-top: 20px;
-            border-radius: 15px; 
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            animation: fadeIn 0.4s ease;
-            display: block;
-            overflow: auto;
-            border-left: 5px solid var(--accent);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .jawi { 
-            font-family: 'Noto Naskh Arabic', serif; 
-            font-size: 2.4rem; 
-            color: var(--primary); 
-            float: right; 
-            direction: rtl;
-            margin-left: 15px;
-            line-height: 1;
-        }
-
-        .word { 
-            font-weight: 700; 
-            font-size: 1.6rem; 
-            color: var(--primary);
-            margin-bottom: 8px;
-            text-transform: capitalize;
-        }
-
-        .meaning { 
-            margin-top: 10px; 
-            line-height: 1.6; 
-            font-size: 1.05rem; 
-            color: #444;
-            clear: both;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 40px;
-            color: #888;
-            font-style: italic;
-        }
-
-        .loading-text {
-            text-align: center;
-            color: var(--accent);
-            font-style: italic;
-            margin-top: 20px;
-        }
-
-        .footer-note {
-            text-align: center;
-            margin-top: 50px;
-            font-size: 0.8rem;
-            color: #999;
-            border-top: 1px solid #eee;
-            padding-top: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .bmc-img {
-            height: 40px;
-            transition: transform 0.2s;
-            border-radius: 8px;
-        }
-        .bmc-img:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <header>
-        <h1>Astaka Aksara</h1>
-        <p class="subtitle">Khazanah Bahasa & Tulisan Jawi</p>
-    </header>
-
-    <label for="searchInput" class="sr-only">Cari kosa kata atau makna</label>
-    <input type="text" id="searchInput" class="search-box" placeholder="Mencari..." disabled>
-    <div id="loadingIndicator" class="loading-text">Sedang memuatkan pangkalan data...</div>
-
-    <main>
-        <ul id="results" role="list" aria-live="polite"></ul>
-    </main>
-
-    <div class="footer-note">
-        <a href="https://buymeacoffee.com/astakaaksara" target="_blank">
-            <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" class="bmc-img">
-        </a>
-        
-        <div>&copy; 2026 AstakaAksara Digital</div>
-    </div>
-</div>
-
-<script>
-    let dictionaryData = [];
-    const resultsEl = document.getElementById('results');
-    const inputEl = document.getElementById('searchInput');
-    const loadingEl = document.getElementById('loadingIndicator');
-    let debounceTimer = null;
-
-    // --- CSV PARSER ---
-    function parseCSV(str) {
-        const arr = [];
-        let quote = false;
-        let col = 0, c = 0;
-        
-        str = str.replace(/\r\n/g, '\n'); 
-        
-        for (; c < str.length; c++) {
-            let cc = str[c], nc = str[c+1];
-            arr[col] = arr[col] || [];
-            arr[col][0] = arr[col][0] || "";
-
-            if (cc == '"' && quote && nc == '"') { arr[col][arr[col].length-1] += cc; ++c; }
-            else if (cc == '"') { quote = !quote; }
-            else if (cc == ',' && !quote) { arr[col].push(""); }
-            else if (cc == '\n' && !quote) { ++col; }
-            else { arr[col][arr[col].length-1] += cc; }
-        }
-        return arr;
-    }
-
-    // --- LOAD DATA ---
-    fetch('AstakaAksara.csv')
-        .then(response => {
-            if (!response.ok) throw new Error("Gagal memuatkan fail CSV");
-            return response.text();
-        })
-        .then(text => {
-            const rawData = parseCSV(text);
-            for(let i = 1; i < rawData.length; i++) {
-                const row = rawData[i];
-                if(row.length >= 1 && row[0]) { 
-                    dictionaryData.push({
-                        word: row[0].trim(),
-                        jawi: row[1] ? row[1].trim() : "",
-                        meaning: row[2] ? row[2].trim() : "Tiada definisi."
-                    });
-                }
-            }
-            dictionaryData.sort((a, b) => a.word.localeCompare(b.word));
-
-            loadingEl.style.display = 'none';
-            inputEl.disabled = false;
-            inputEl.placeholder = "Cari perkataan (contoh: Adiwarna)";
-            inputEl.focus();
-        })
-        .catch(err => {
-            console.error(err);
-            loadingEl.textContent = "Ralat: Fail 'AstakaAksara.csv' tidak dijumpai.";
-            loadingEl.style.color = "red";
-        });
-
-    // --- RENDER RESULTS ---
-    function renderResults(items) {
-        resultsEl.innerHTML = '';
-        if (!items.length) {
-            resultsEl.innerHTML = '<li class="no-results">Tiada padanan dijumpai.</li>';
-            return;
-        }
-
-        const limit = 10; 
-        const fragment = document.createDocumentFragment();
-
-        items.slice(0, limit).forEach(item => {
-            const li = document.createElement('li');
-            li.className = 'entry';
-
-            // Jawi Element
-            if (item.jawi) {
-                const jawiDiv = document.createElement('div');
-                jawiDiv.className = 'jawi';
-                jawiDiv.textContent = item.jawi;
-                li.appendChild(jawiDiv);
-            }
-
-            // Word Element
-            const wordDiv = document.createElement('div');
-            wordDiv.className = 'word';
-            wordDiv.textContent = item.word;
-            li.appendChild(wordDiv);
-
-            // Meaning Element
-            const meaningDiv = document.createElement('div');
-            meaningDiv.className = 'meaning';
-            meaningDiv.textContent = item.meaning;
-            li.appendChild(meaningDiv);
-
-            fragment.appendChild(li);
-        });
-        resultsEl.appendChild(fragment);
-    }
-
-    function doSearch() {
-        const raw = inputEl.value.trim();
-        const term = raw.toLowerCase();
-
-        if (term.length < 1) {
-            resultsEl.innerHTML = '';
-            return;
-        }
-
-        const filtered = dictionaryData.filter(item => {
-            return item.word.toLowerCase().includes(term) || 
-                   item.meaning.toLowerCase().includes(term);
-        });
-
-        renderResults(filtered);
-    }
-
-    inputEl.addEventListener('input', () => {
-        if (debounceTimer) clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(doSearch, 150);
-    });
-</script>
-
-</body>
-</html>
+            margin-bottom: 3
