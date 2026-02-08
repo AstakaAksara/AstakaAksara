@@ -135,6 +135,21 @@
             color: #999;
             border-top: 1px solid #eee;
             padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Styles for the Buy Me Coffee Image */
+        .bmc-img {
+            height: 40px;
+            transition: transform 0.2s;
+            border-radius: 8px;
+        }
+        .bmc-img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
     </style>
 </head>
@@ -155,8 +170,11 @@
     </main>
 
     <div class="footer-note">
-        &copy; 2026 AstakaAksara Digital<br>
-        <i>Dipelihara di GitHub</i>
+        <a href="https://buymeacoffee.com/astakaaksara" target="_blank">
+            <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" class="bmc-img">
+        </a>
+        <div>&copy; 2026 AstakaAksara Digital</div>
+        <div><i>Dipelihara di GitHub</i></div>
     </div>
 </div>
 
@@ -234,64 +252,3 @@
         if (!items.length) {
             resultsEl.innerHTML = '<li class="no-results">Tiada padanan dijumpai.</li>';
             return;
-        }
-
-        // --- LIMIT SET TO 10 HERE ---
-        const limit = 10; 
-        const fragment = document.createDocumentFragment();
-
-        // .slice(0, limit) ensures we only take the first 10 items
-        items.slice(0, limit).forEach(item => {
-            const li = document.createElement('li');
-            li.className = 'entry';
-
-            // Jawi Element
-            if (item.jawi) {
-                const jawiDiv = document.createElement('div');
-                jawiDiv.className = 'jawi';
-                jawiDiv.textContent = item.jawi;
-                li.appendChild(jawiDiv);
-            }
-
-            // Word Element
-            const wordDiv = document.createElement('div');
-            wordDiv.className = 'word';
-            wordDiv.textContent = item.word;
-            li.appendChild(wordDiv);
-
-            // Meaning Element
-            const meaningDiv = document.createElement('div');
-            meaningDiv.className = 'meaning';
-            meaningDiv.textContent = item.meaning;
-            li.appendChild(meaningDiv);
-
-            fragment.appendChild(li);
-        });
-        resultsEl.appendChild(fragment);
-    }
-
-    function doSearch() {
-        const raw = inputEl.value.trim();
-        const term = raw.toLowerCase();
-
-        if (term.length < 1) {
-            clearResults();
-            return;
-        }
-
-        const filtered = dictionaryData.filter(item => {
-            return item.word.toLowerCase().includes(term) || 
-                   item.meaning.toLowerCase().includes(term);
-        });
-
-        renderResults(filtered);
-    }
-
-    inputEl.addEventListener('input', () => {
-        if (debounceTimer) clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(doSearch, 150);
-    });
-</script>
-
-</body>
-</html>
